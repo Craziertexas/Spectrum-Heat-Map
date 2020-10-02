@@ -1,1 +1,0 @@
-Este es el data collector
