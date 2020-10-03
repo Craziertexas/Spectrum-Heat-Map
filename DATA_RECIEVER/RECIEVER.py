@@ -1,25 +1,44 @@
 from pylab import *
 from rtlsdr import *
 from time import sleep
+import asyncio
 
 class RECEIVER():
     
     def __init__(self):
         
+        self.loop=asyncio.get_event_loop()
+        self.loop.create_task(self.manager())
+        self.loop.run_forever()
+        
+        for i in range(0,100,1):
+            sleep(1)
+            print("Zzzzz")
+        
+    async def manager(self):
+        
+        try:
+            min=int(input("Enter the min frequency"))
+            max=int(input("Enter the max frequency"))
+        except:
+            print("Wrong numbers, taking defaul values")
+            min=int(100e6)
+            max=int(200e6)
+             
         self.sdr= RtlSdr()
         self.sdr.gain=4
         self.sdr.sample_rate=2.4e6
-        min=int(input("Enter the min frequency"))
-        max=int(input("Enter the max frequency"))
         
-        for center in range(min,max,(int(1e3))):
-            buff=self.data_collector(center)
+        for center in range(min,max,(int(10e3))):
+            buff=await self.data_collector(center)
             print(buff)
         
-    def data_collector(self,center):
+        self.loop.stop()
+        
+    async def data_collector(self,center):
+        
         self.sdr.center_freq=center
         samples=self.sdr.read_samples(256*1024)
-        sleep(0.2)
         return samples
         
 if __name__ =="__main__":
