@@ -29,10 +29,14 @@ class RECEIVER():
         self.sdr.gain=4
         self.sdr.sample_rate=2.4e6
         
-        for center in range(min,max,(int(10e3))):
+        for center in range(min,max,(int(10e6))):
             buff=await self.data_collector(center)
-            print(buff)
+            psd(buff, NFFT=1024, Fs=self.sdr.sample_rate/1e6, Fc=self.sdr.center_freq/1e6)
+            xlabel('Frequency (MHz)')
+            ylabel('Relative power (dB)')
+            show()
         
+        self.sdr.close()
         self.loop.stop()
         
     async def data_collector(self,center):
