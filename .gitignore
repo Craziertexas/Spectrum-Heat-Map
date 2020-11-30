@@ -1,1 +1,5 @@
 WEB/front/.env
+WEB/FRONT/src/.env
+WEB/API/routes/env.json
+WEB/API/node_modules
+DATA_RECIEVER/node_modules

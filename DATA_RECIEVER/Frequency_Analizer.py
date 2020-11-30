@@ -17,7 +17,7 @@ class FreqAnalizer():
         self.SDR.set_gain = 0
         #UDP Server
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.bind(('192.168.20.64', 40000))
+        self.socket.bind(('192.168.10.71', 40000))
         self.mainloop()
 
     def mainloop(self):
@@ -35,10 +35,12 @@ class FreqAnalizer():
                     packet = {"power": Power.tolist(),"frequencies":Freqs.tolist() ,"coordinates":{"lng":coordinates[0],"lat":coordinates[1]}}
             http_sw = True
             while http_sw:
-                response = requests.post("http://localhost:4000",json.dumps(packet,indent=4))
-                print('Paquete:')
-                print(packet)
-                print(response)
+                try:
+                    response = requests.post("http://localhost:4000/INSERT",json=packet)
+                    print('Paquete:')
+                    print(response.json())
+                except:
+                    print('ERROR')
                 http_sw = bool(input('Se envió correctamente?'))
 
 
