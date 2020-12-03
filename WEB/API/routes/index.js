@@ -16,7 +16,7 @@ const MysqlConnection = mysql.createConnection({
   database: DATA,
 });
 
-//EMPANADA DE ARROZ, NO HACE REJECT EN FALLO DE QUERY
+
 function onInsertion(power, freqs, coord) {
   return new Promise((resolve, reject) => {
     var index = 0;
@@ -42,7 +42,7 @@ function onInsertion(power, freqs, coord) {
 function onFilter(range, dbrange) {
   return new Promise((resolve, reject) => {
     console.log(range);
-    const FilterQuery = 'SELECT freq,power,lat,lng FROM espectro WHERE freq > '.concat((range.min).toString(),' AND freq < ', (range.max).toString(),' AND power > ',(dbrange).toString());
+    const FilterQuery = 'SELECT freq,power,lat,lng FROM espectro WHERE freq >= '.concat((range.min).toString(),' AND freq <= ', (range.max).toString(),' AND power > ',(dbrange).toString());
     console.log(FilterQuery);
     MysqlConnection.query(FilterQuery, function(error, result) {
       if(error) {

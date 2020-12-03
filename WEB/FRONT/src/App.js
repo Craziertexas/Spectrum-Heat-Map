@@ -4,7 +4,6 @@ import React, {Component} from 'react';
 import MapGL, {Source, Layer} from 'react-map-gl';
 import SlidingPanel from 'react-sliding-side-panel';
 import {Button} from 'rebass';
-import InputRange from 'react-input-range';
 import 'react-input-range/lib/css/index.css';
 import axios from 'axios';
 import NumericInput from 'react-numeric-input';
@@ -12,15 +11,8 @@ import NumericInput from 'react-numeric-input';
 const API_KEY_MAPS=process.env.REACT_APP_MAPS_API;
 const API_URL_1=process.env.REACT_APP_API_URL_1;
 
-const mapContainerStyle={
-  width: '100vw',
-  height: '100vh',
-};
-
-const MAX_ZOOM_LEVEL = 20;
-
 const heatmapLayer = {
-  maxzoom: MAX_ZOOM_LEVEL,
+  maxzoom: 20,
   type: 'heatmap',
   paint: {
     // Increase the heatmap weight based on frequency and property magnitude
@@ -68,9 +60,9 @@ class App extends Component {
     super();
     this.state={
       viewport: {
-        latitude: 4.57,
-        longitude: -74.29,
-        zoom: 3,
+        latitude: 11.022053718566898,
+        longitude: -74.81536865234376,
+        zoom: 17,
         bearing: 0,
         pitch: 0,
         data: [],
@@ -94,15 +86,23 @@ class App extends Component {
     });
   }
 
-  onRangeInput(value) {
+  onRangeInput(value, selector) {
     console.log(value);
-    this.setState({
-      FreqRange: value,
-    });
+    if (selector === 'min'){
+      this.setState({
+        FreqRange: {min: value, max: this.state.FreqRange.max},
+      });
+    }
+    if (selector === 'max'){
+      this.setState({
+        FreqRange: {min: this.state.FreqRange.min, max: value},
+      });
+    }
   }
 
   onFilterButton() {
     console.log('Enviar');
+    console.log(this.state.FreqRange);
     axios.post(API_URL_1, ({
       range: this.state.FreqRange,
       dbrange: this.state.DbRange,
@@ -111,6 +111,7 @@ class App extends Component {
           this.setState({
             data: makeGeoJSON(makeNormal(response.data)),
           });
+          console.log(this.state.data);
         })
         .catch((error)=> {
           alert(error);
@@ -175,7 +176,7 @@ class App extends Component {
         <SlidingPanel
           type={'left'}
           isOpen={this.state.PanelState}
-        >
+        > 
           <div
             style={
               {
@@ -183,17 +184,21 @@ class App extends Component {
                 top: '0%',
                 left: '0%',
                 position: 'absolute',
-                backgroundColor: '#e23a07',
+                backgroundColor: '#6c7d82',
                 width: '30%',
                 height: '100%',
               }
             }
           >
+            <div style={{top: '0%', left: '5%', position: 'absolute', zIndex: '10'}}>
+            <h2>{'HeatMap Based on Frequency Spectrum 📻'}</h2>
+            </div>
+
             <div
               style={
                 {
                   top: '50%',
-                  left: '85%',
+                  left: '87%',
                   position: 'relative',
                   zIndex: '10',
                 }
@@ -210,6 +215,28 @@ class App extends Component {
             <div
               style={
                 {
+                  top: '18%',
+                  left: '10%',
+                  position: 'absolute',
+                  zIndex: '10',
+                  width: '80%',
+                  height: '10%',
+                }
+              }
+            >
+              <h4 style={{top: '10%'}}>{'Min Freq (MHz):'}</h4>
+              <NumericInput
+                style={{zIndex: '10'}}
+                step={10}
+                min={100}
+                max={1700}
+                value={this.state.FreqRange.min}
+                onChange={(value) => this.onRangeInput(value,'min')}
+              />
+            </div>
+            <div
+              style={
+                {
                   top: '30%',
                   left: '10%',
                   position: 'absolute',
@@ -219,23 +246,22 @@ class App extends Component {
                 }
               }
             >
-              <InputRange
-                maxValue={1700}
-                minValue={100}
-                step={100}
-                value={this.state.FreqRange}
-                onChange={(value) => {
-                  this.onRangeInput(value);
-                }}
-                formatLabel={(value) => `${value} MHz`}
+              <h4 style={{top: '10%'}}>{'Max Freq (MHz):'}</h4>
+              <NumericInput
+                style={{zIndex: '10'}}
+                step={10}
+                min={100}
+                max={1700}
+                value={this.state.FreqRange.max}
+                onChange={(value) => this.onRangeInput(value,'max')}
               />
             </div>
 
             <div
               style={
                 {
-                  top: '40%',
-                  left: '50%',
+                  top: '60%',
+                  left: '10%',
                   position: 'absolute',
                   zIndex: '10',
                 }
@@ -247,19 +273,20 @@ class App extends Component {
                 }}
                 style={{backgroundColor: 'black', cursor: 'pointer'}}
               >
-                Enviar
+                Filter
               </Button>
             </div>
             <div
               style={
                 {
-                  top: '50%',
+                  top: '42%',
                   left: '10%',
                   position: 'absolute',
                   zIndex: '10',
                 }
               }
             >
+              <h4 style={{top: '5%'}}>{'Power Threshold (dB)'}</h4>
               <NumericInput
                 step={10}
                 min={-150}
